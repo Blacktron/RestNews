@@ -1,4 +1,4 @@
-# REST News
+# News
 
 ### Prerequisites
 1. Download and install Node.js (LTS version preferably) from [here](https://nodejs.org/en/download)
