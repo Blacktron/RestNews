@@ -13,7 +13,7 @@ services:
       context: .
     environment:
       NODE_ENV: production
-      MONGO_URI: "mongodb+srv://viktorbutanski:terrax88@nodeapi.bdeq3zk.mongodb.net/newsapi?retryWrites=true&w=majority"
+      MONGO_URI: "mongodb+srv://viktorbutanski:Super5trongPass@nodeapi.bdeq3zk.mongodb.net/newsapi?retryWrites=true&w=majority"
       SERVER_PORT: 3000
     ports:
       - 3000:3000
