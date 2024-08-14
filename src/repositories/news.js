@@ -1,42 +1,28 @@
 'use strict';
 
 import News from '../models/news.js';
+import { prepareSortQuery, prepareFilterQuery } from '../services/news.js';
 
 export async function getNews(ctx) {
     try {
         let news;
 
         if (ctx.query.sort) {
-            const sortingFields = ctx.query.sort.split(',');
-            const sortObj = {};
-
-            sortingFields.forEach((entry) => {
-                sortObj[entry] = 'asc'
-            });
-
+            const sortObj = await prepareSortQuery(ctx);
             news = await News.find().sort(sortObj);
         } else if (ctx.query.filter) {
-            const filterFields = ctx.query.filter.split(',');
-            const filterObj = {};
+            const filterObj = await prepareFilterQuery(ctx);
 
-            for (const filterField of filterFields) {
-                if (filterField === 'date') {
-                    const filterStartDate = new Date(ctx.query.startDate);
-                    const filterEndDate = new Date(ctx.query.endDate);
-                    console.log(`filterEndDate=${filterEndDate}`);
-
-                    filterObj[filterField] = {
-                        $gte: filterStartDate,
-                        ...(ctx.query.endDate && { $lt: filterEndDate })
-                    }
+            if (filterObj.error && filterObj.error === true) {
+                ctx.status = 400;
+                ctx.body = {
+                    'error': filterObj.errorMessage
                 }
 
-                if (filterField === 'title') {
-                    filterObj[filterField] = { $regex: ctx.query.searchTitle, $options: 'i' }
-                }
+                return;
+            } else {
+                news = await News.find(filterObj);
             }
-
-            news = await News.find(filterObj);
         } else {
             news = await News.find();
         }
@@ -47,7 +33,7 @@ export async function getNews(ctx) {
         console.log(`Failed to get news. Message: ${e.message}`);
         ctx.status = 500;
         ctx.body = {
-            'message': `Failed to get news. Message: ${e.message}`
+            'error': `Failed to get news. Message: ${e.message}`
         }
     }
 }
@@ -64,7 +50,7 @@ export async function createNews(ctx) {
         console.log(`Failed to save entity to MongoDB. Message: ${e.message}`);
         ctx.status = 500;
         ctx.body = {
-            'message': `Failed to save entity to MongoDB. Message: ${e.message}`,
+            'error': `Failed to save entity to MongoDB. Message: ${e.message}`,
         }
     }
 
@@ -74,12 +60,15 @@ export async function deleteNews(ctx) {
     try {
         const query = { _id: ctx.params.id };
         await News.deleteOne(query);
-        ctx.status = 204;
+        ctx.status = 200;
+        ctx.body = {
+            'message': `Successfully deleted news entity with id=${ctx.params.id}`,
+        }
     } catch (e) {
         console.log(`Failed to delete entity. Message: ${e.message}`);
         ctx.status = 500;
         ctx.body = {
-            'message': `Failed to delete entity. Message: ${e.message}`,
+            'error': `Failed to delete entity. Message: ${e.message}`,
         }
     }
 }
@@ -97,7 +86,7 @@ export async function updateNews(ctx) {
         console.log(`Failed to update entity. Message: ${e.message}`);
         ctx.status = 500;
         ctx.body = {
-            'message': `Failed to update entity. Message: ${e.message}`,
+            'error': `Failed to update entity. Message: ${e.message}`,
         }
     }
 }

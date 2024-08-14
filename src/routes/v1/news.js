@@ -21,9 +21,9 @@ router.post('/', async (ctx, next) => {
     if (isRequestValid) {
         await createNews(ctx);
     } else {
-        ctx.status = 500;
+        ctx.status = 400;
         ctx.body = {
-            'message': 'Something went wrong! Please provide value for date, title, short description, and text'
+            'error': 'Something went wrong! Please provide value for date, title, short description, and text.'
         }
     }
 
@@ -31,16 +31,7 @@ router.post('/', async (ctx, next) => {
 });
 
 router.delete('/:id', async (ctx, next) => {
-    const isRequestValid = await validateRequest(ctx);
-
-    if (isRequestValid) {
-        await deleteNews(ctx);
-    } else {
-        ctx.status = 500;
-        ctx.body = {
-            'message': 'Something went wrong! Please provide value for date, title, short description, and text'
-        }
-    }
+    await deleteNews(ctx);
 
     next();
 });
@@ -51,9 +42,9 @@ router.put('/:id', async (ctx, next) => {
     if (isRequestValid) {
         await updateNews(ctx);
     } else {
-        ctx.status = 500;
+        ctx.status = 400;
         ctx.body = {
-            'message': 'Something went wrong! Please provide value for date, title, short description, and text'
+            'error': 'Something went wrong! Please provide value for date, title, short description, and text.'
         }
     }
 
